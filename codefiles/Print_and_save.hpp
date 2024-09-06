@@ -57,7 +57,7 @@ class Saver{ /// Class for saving output values, and printing key values
             if (num == '0'){
                     std::cout << "no file saved" <<std::endl;
             }else{
-                   
+                   std::cout << "num " << num << std::endl;
                     fout.open(folder+"/results"+num+basicfile+timestring);
                     std::cout << folder+"/results"+num+basicfile+timestring << std::endl;
                     //fout << "m/M $p/P_C$ r/R rho G1 G2 \n";
@@ -67,13 +67,6 @@ class Saver{ /// Class for saving output values, and printing key values
                         fout << planet->M <<"\n"<< planet->scale ;
                         
                     fout.close();
-                    fout.open(folder+"/Fluxes"+num+basicfile+timestring);
-                        fout << Fls;
-                    fout.close();
-                    fout.open(folder+"/debug"+num+basicfile+timestring);
-                        fout << debug_quantities;
-                    fout.close();
-                    
                    
                     std::cout << "files saved\n" <<std::endl;
             }

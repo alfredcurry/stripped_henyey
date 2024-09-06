@@ -18,7 +18,7 @@ double Gen_Struct( int _J , double n , double Tsurf , double Psurf){
     int I = 4;
     double acc = 1e-5;
     std::string folder ;
-    folder = "Tests/RunFiles";
+    folder = "Tests/RunFiles/";
 
     char Tstring[100] , condstring[100] , Resstring[100], nstring[100];
     struct P_P planet(I,J);
@@ -41,7 +41,6 @@ double Gen_Struct( int _J , double n , double Tsurf , double Psurf){
     //m and guesses
     planet.m = JacobMaker::massbins(J); // ArrayXd::LinSpaced(J,0,1);//
   
-    Converger con(I,J);
     ArrayXXd mPr0;
     ArrayXd scale0; 
   
@@ -104,47 +103,17 @@ double Gen_Struct( int _J , double n , double Tsurf , double Psurf){
     planet.T0 = planet.scale(3)*planet.y.block(0,2,J-1,1);
     planet.P0 = planet.scale(0)*planet.y.block(0,0,J-1,1);
 
-    Map<Matrix<double , Eigen::Dynamic , Eigen::Dynamic , RowMajor> > G(con.Gv, J, I);
-
     planet.dt = 1e308;
-   
-      
-    con.nmax = 500;
-    con.converge(&planet , &EoSIdeal, acc );
+    double f_time = 0 , time = 0 ;
+    char num = '1';
+
+    stepper tStepper(I,J);
+
+    tStepper.static_struct(&planet , &EoSIdeal, acc );
+
+    tStepper.print.set_files(&planet ,  num  , f_time , folder , EoSIdeal.EoStype , time);
+    tStepper.print.save_values(num , &planet , &EoSIdeal  , time , f_time, tStepper.con);
                 
-    //print the stuff
-    if(con.n >  con.nmax){
-          std::cout << "not converged to required accuracy in " << con.nmax << std::endl;
-    }
-    else{
-          std::cout << "No. iterations: " << con.n << " of a maximum of: "<< con.nmax << std::endl;
-    
-            
-          std::cout << "Max innacuracy: " << con.maxinacc << ", Mean Accuracy: " << con.meaninacc << std::endl; 
-
-          ofstream fout;
-              
-          Allthing.col(0) = planet.m;
-          Allthing.block(0,1,J,I) = planet.y;
-          Allthing.block(0, I+1,J,1) = planet.rho;
-          Allthing.block(0, I+2,J,1) = planet.nabla;
-          Allthing.block(0,I+3, J,I) = con.ErrorArray;
-                        
-          fout.open("./"+folder+"/resultsSTRUCT_TEST"+nstring+Resstring+condstring+Tstring+".txt");
-                //fout << "m/M $p/P_C$ r/R rho G1 G2 \n";
-                fout << Allthing ;
-                fout.close();
-                fout.open("./"+folder+"/scaleSTRUCT_TEST"+nstring+Resstring+condstring+Tstring+".txt");
-                fout << planet.M <<"\n"<< planet.scale ;
-                fout.close();
-               
-    }
-    if( con.maxinacc > acc){
-            std::cout << "too innaccurate\n" << std::endl;
-    }
-    
-    std::cout << "scales " << planet.scale.transpose() << " Tsurf " << planet.Tsurf[0] << " Psurf " << planet.Psurf[0] << std::endl;
-
     ArrayXd rho_th ;
     double K0 = std::pow(planet.Tsurf[0]*boltz_R/planet.mu_m ,1+1.0/planet.n)/std::pow(planet.Psurf[0] , 1.0/planet.n);
     double radius_const = sqrt(2*M_PI*G_Newt/K0);
