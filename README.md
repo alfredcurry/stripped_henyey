@@ -1,4 +1,5 @@
-#README
+# README
+
 Here is a stripped down version of the interior strucuture solver STEREO-D. I just include an ideal equation of state and one test. 
 
 ## INSTALLATION
